@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Distance Map</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+
+    .option-button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4a90e2;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .option-button:hover {
+      background-color: #357ABD;
+    }
+
+    table {
+      border-collapse: collapse;
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px 12px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #eaeaea;
+    }
+
+    .map {
+      margin-top: 20px;
+      display: grid;
+      gap: 2px;
+      background-color: #ccc;
+      max-width: fit-content;
+    }
+
+    .cell {
+      width: 30px;
+      height: 30px;
+      font-size: 18px;
+      text-align: center;
+      line-height: 30px;
+      background-color: white;
+    }
+
+    .enemy {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .selected {
+      background-color: #27ae60;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h1>احتمالاتي</h1>
+<div id="options"></div>
+<div id="result"></div>
+<div id="map"></div>
+<div id="hoverCoords" style="margin-top: 10px; font-weight: bold;"></div>
+
+
+<script>
+  const options = [
+    [3, 2],
+    [4, 1],
+    [0, 5]
+  ];
+
+  const enemies = [
+    [0, 0],
+    [5, 5],
+    [3, 6]
+  ];
+
+  const optionsDiv = document.getElementById("options");
+  const resultDiv = document.getElementById("result");
+  const mapDiv = document.getElementById("map");
+
+  options.forEach((option, index) => {
+    const btn = document.createElement("button");
+    btn.className = "option-button";
+    btn.textContent = `الخيار ${index + 1}: (${option[0]}, ${option[1]})`;
+    btn.onclick = () => showData(option);
+    optionsDiv.appendChild(btn);
+  });
+
+  function showData(option) {
+    showDistances(option);
+    showMap(option);
+  }
+
+  function showDistances(option) {
+    const [x, y] = option;
+    let tableHTML = `
+      <h2>نتائج المسافات لـ (${x}, ${y})</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>العدو (ex, ey)</th>
+            <th>dx</th>
+            <th>dy</th>
+            <th>المسافة²</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    let minDistanceSq = Infinity;
+    let closestEnemy = null;
+
+    enemies.forEach(([ex, ey]) => {
+      const dx = x - ex;
+      const dy = y - ey;
+      const distSq = dx * dx + dy * dy;
+      if (distSq < minDistanceSq) {
+        minDistanceSq = distSq;
+        closestEnemy = [ex, ey];
+      }
+
+      tableHTML += `
+        <tr>
+          <td>(${ex}, ${ey})</td>
+          <td>${dx}</td>
+          <td>${dy}</td>
+          <td>${distSq}</td>
+        </tr>
+      `;
+    });
+
+    tableHTML += `
+        </tbody>
+      </table>
+      <p><strong>أقرب عدو: (${closestEnemy[0]}, ${closestEnemy[1]})</strong></p>
+      <p><strong>أقرب مسافة²: ${minDistanceSq}</strong></p>
+    `;
+
+    resultDiv.innerHTML = tableHTML;
+  }
+
+  function showMap(selected) {
+    const allPoints = [...options, ...enemies];
+    const maxX = Math.max(...allPoints.map(p => p[0])) + 1;
+    const maxY = Math.max(...allPoints.map(p => p[1])) + 1;
+
+  mapDiv.style.gridTemplateColumns = `repeat(${maxX}, 30px)`;
+mapDiv.style.gridTemplateRows = `repeat(${maxY}, 30px)`;
+mapDiv.className = "map";
+
+const hoverDiv = document.getElementById("hoverCoords");
+
+for (let y = 0; y < maxY; y++) {
+  for (let x = 0; x < maxX; x++) {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    // عرض الإحداثيات عند التحويم
+    cell.onmouseenter = () => {
+      hoverDiv.textContent = `الموقع: (${x}, ${y})`;
+    };
+    cell.onmouseleave = () => {
+      hoverDiv.textContent = '';
+    };
+
+    if (enemies.some(([ex, ey]) => ex === x && ey === y)) {
+      cell.classList.add("enemy");
+      cell.textContent = "🟥";
+    } else if (selected[0] === x && selected[1] === y) {
+      cell.classList.add("selected");
+      cell.textContent = "🟩";
+    } else {
+      cell.textContent = "⬜";
+    }
+
+    mapDiv.appendChild(cell);
+  }
+}
+  }
+</script>
+
+</body>
+</html>
