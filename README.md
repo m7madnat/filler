@@ -1,3 +1,5 @@
+## Overview
+This project implements a grid-based strategy game where two players compete to occupy as much space as possible. Each player strategically places pieces on the grid to maximize their area of ​​control while blocking their opponent's moves. The goal is to occupy as many squares as possible while minimizing their opponent's options, using an intelligent placement algorithm.
 # Filler docker image
 
 - To build the image `docker build -t filler .`
@@ -20,7 +22,7 @@ Inside container:
  `
 
 `./linux_game_engine -f maps/map01 -p1 linux_robots/bender -p2 linux_robots/terminator > logs/bender_vs_terminator.txt`
-
+## How to run
 docker build -t filler .
 docker run -v "$(pwd)" -it filler
 ./linux_game_engine -f maps/map00 -p1 solution/target/debug/filler -p2 linux_robots/bender
